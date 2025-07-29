@@ -1,0 +1,43 @@
+{
+    "name": "user-service",
+    "version": "1.0.0",
+    "description": "User service for blog application",
+    "main": "src/server.js",
+    "directories": {
+        "test": "tests"
+    },
+    "scripts": {
+        "start": "node src/server.js",
+        "dev": "nodemon src/server.js",
+        "test": "jest --runInBand --detectOpenHandles",
+        "test:unit": "jest --runInBand test/unit",
+        "test:integration": "jest --runInBand test/integration",
+        "test:watch": "jest --watch",
+        "lint": "eslint .",
+        "format": "prettier --write ."
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "dependencies": {
+        "axios": "^1.11.0",
+        "bcryptjs": "^3.0.2",
+        "cors": "^2.8.5",
+        "dotenv": "^17.2.1",
+        "express": "^5.1.0",
+        "helmet": "^8.1.0",
+        "jsonwebtoken": "^9.0.2",
+        "memory-cache": "^0.2.0",
+        "mongoose": "^8.16.5",
+        "morgan": "^1.10.1"
+    },
+    "devDependencies": {
+        "@shelf/jest-mongodb": "^5.2.2",
+        "eslint": "^9.32.0",
+        "jest": "^30.0.5",
+        "mongodb-memory-server": "^10.1.4",
+        "nodemon": "^3.1.10",
+        "prettier": "^3.6.2",
+        "supertest": "^7.1.4"
+    }
+}

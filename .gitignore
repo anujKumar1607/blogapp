@@ -1,0 +1,16 @@
+# Global ignores (applied to all services)
+**/node_modules/  # Ignore node_modules in ALL directories
+**/.env           # Ignore local .env files
+**/dist/          # Ignore build outputs
+**/.DS_Store      # macOS metadata
+**/npm-debug.log*
+**/.idea/         # JetBrains IDE files
+**/.vscode/       # VS Code settings
+
+# Docker-related ignores
+**/.dockerignore
+**/Dockerfile-dev
+
+# Optional: Service-specific ignores
+# api-gateway/logs/
+# user-service/logs/

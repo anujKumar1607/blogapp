@@ -1,0 +1,85 @@
+pipeline {
+    agent any
+
+    environment {
+        DOCKER_HUB = credentials('docker-hub-cred')
+        KUBECONFIG = credentials('kubeconfig')
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                git branch: 'main', url: 'https://github.com/your-repo/blog-app.git'
+            }
+        }
+
+        stage('Install Dependencies') {
+            steps {
+                sh 'cd content-service && npm install'
+            }
+        }
+
+        stage('Unit Tests') {
+            steps {
+                sh 'cd content-service && npm test:unit'
+            }
+        }
+
+        stage('Integration Tests') {
+            steps {
+                sh 'cd content-service && npm test:integration'
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                script {
+                    docker.build("your-dockerhub/content-service:${env.BUILD_NUMBER}", "--file content-service/Dockerfile ./content-service")
+                }
+            }
+        }
+
+        stage('Push to Docker Hub') {
+            steps {
+                script {
+                    docker.withRegistry('https://registry.hub.docker.com', 'docker-hub-cred') {
+                        docker.image("your-dockerhub/content-service:${env.BUILD_NUMBER}").push()
+                    }
+                }
+            }
+        }
+
+        stage('Deploy to Staging') {
+            when {
+                branch 'main'
+            }
+            steps {
+                sh """
+                    kubectl config use-context staging
+                    kubectl set image deployment/content-service content-service=your-dockerhub/content-service:${env.BUILD_NUMBER} --record
+                """
+            }
+        }
+
+        stage('Deploy to Production') {
+            when {
+                branch 'release'
+            }
+            steps {
+                sh """
+                    kubectl config use-context production
+                    kubectl set image deployment/content-service content-service=your-dockerhub/content-service:${env.BUILD_NUMBER} --record
+                """
+            }
+        }
+    }
+
+    post {
+        always {
+            cleanWs()
+        }
+        failure {
+            slackSend channel: '#alerts', message: "Build ${env.BUILD_NUMBER} failed: ${env.BUILD_URL}"
+        }
+    }
+}

@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  api-gateway:
+    build: .
+    environment:
+      - NODE_ENV=production
+      - USER_SERVICE_URL=http://user-service:3001
+      - CONTENT_SERVICE_URL=http://content-service:3002
+    ports:
+      - "3000:3000"
+    networks:
+      - blog-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+networks:
+  blog-network:
+    external: true

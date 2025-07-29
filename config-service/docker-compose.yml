@@ -1,0 +1,11 @@
+version: '3.8'
+services:
+  config-service:
+    build: .
+    ports:
+      - "3003:3003"
+    networks:
+      - blog-network
+networks:
+  blog-network:
+    external: true

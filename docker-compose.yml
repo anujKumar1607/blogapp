@@ -1,0 +1,66 @@
+services:
+  # User Service
+  user-service:
+    build: ./user-service
+    container_name: user-service
+    ports:
+      - "3001:3001"  # Map host port 3001 to container port 3000
+    environment:
+      - NODE_ENV=development
+      - PORT=3001
+      - MONGO_URI=mongodb://user-db:27017/user_db
+      - JWT_SECRET=blogAppWithMicroserviceArchitecture
+    depends_on:
+      - user-db  # Wait for MongoDB to start
+
+    networks:
+      - blog-network
+
+  # MongoDB for User Service
+  user-db:
+    image: mongo:6.0
+    container_name: user-db
+    ports:
+      - "27017:27017"  # Exposed for direct access if needed
+    volumes:
+      - user-data:/data/db
+    environment:
+      - MONGO_INITDB_DATABASE=user_db
+    networks:
+      - blog-network
+
+  # API Gateway (placeholder for future)
+  api-gateway:
+    build: ./api-gateway
+    container_name: api-gateway
+    # environment:
+    #   - NODE_ENV=development
+    #   - USER_SERVICE_URL=http://user-service:3001
+    #   - CONTENT_SERVICE_URL=http://content-service:3002
+    ports:
+      - "3000:3000"
+    depends_on:
+      - user-service
+    networks:
+      - blog-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+  
+  nginx:
+    build: ./nginx
+    ports:
+      - "80:80"
+    depends_on:
+      - api-gateway
+    networks:
+      - blog-network
+# Networks and Volumes
+networks:
+  blog-network:
+    driver: bridge
+
+volumes:
+  user-data:

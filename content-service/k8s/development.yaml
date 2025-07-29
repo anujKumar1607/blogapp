@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: content-service
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: content-service
+  template:
+    metadata:
+      labels:
+        app: content-service
+    spec:
+      containers:
+      - name: content-service
+        image: your-dockerhub/content-service
+        ports:
+        - containerPort: 3002
+        envFrom:
+        - configMapRef:
+            name: content-service-config
+        - secretRef:
+            name: content-service-secrets
+        resources:
+          limits:
+            memory: "512Mi"
+            cpu: "500m"

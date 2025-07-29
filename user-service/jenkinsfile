@@ -1,0 +1,40 @@
+pipeline {
+    agent any
+
+    environment {
+        DOCKER_HUB = credentials('docker-hub-cred')
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                git branch: 'main', url: 'https://github.com/your-repo/blog-app.git'
+            }
+        }
+
+        stage('Test') {
+            steps {
+                sh 'cd user-service && npm install && npm test'
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                sh 'cd user-service && docker build -t your-dockerhub/user-service:${BUILD_NUMBER} .'
+            }
+        }
+
+        stage('Push to Docker Hub') {
+            steps {
+                sh 'docker login -u ${DOCKER_HUB_USR} -p ${DOCKER_HUB_PSW}'
+                sh 'docker push your-dockerhub/user-service:${BUILD_NUMBER}'
+            }
+        }
+
+        stage('Deploy to Staging') {
+            steps {
+                sh 'kubectl apply -f user-service/k8s/deployment.yaml'
+            }
+        }
+    }
+}
