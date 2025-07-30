@@ -11,6 +11,8 @@ app.use((req, res, next) => {
 // Health check endpoint
 app.get('/health', (req, res) => res.send('OK'));
 
+
+
 // Proxy middleware for user-service
 app.use('/', createProxyMiddleware({
     target: 'http://user-service:3001',
