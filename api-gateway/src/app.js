@@ -9,7 +9,7 @@ app.use((req, res, next) => {
 });
 
 // Health check endpoint
-app.get('/health', (req, res) => res.send('OK'));
+app.get('/health', (req, res) => res.send('Everything is OK'));
 
 
 
