@@ -2,15 +2,16 @@ const Post = require('../models/post.model');
 const Category = require('../models/category.model');
 const AppError = require('../utils/appError');
 const APIFeatures = require('../utils/apiFeatures');
+const axios = require('axios');
 
-const serviceClient = require('../../../shared/utils/serviceclient');
+//const serviceClient = require('../../../shared/utils/serviceclient');
 //const UserApiClient = require('../../../shared/services/userApiClient');
 
 exports.getPostWithAuthor = async (req, res, next) => {
   try {
     // Option 1: Direct using serviceClient
-    const userService = await serviceClient.getService('user-service');
-    const author = await axios.get(`${userService.url}/users/${req.params.userId}`);
+    // const userService = await serviceClient.getService('user-service');
+    // const author = await axios.get(`${userService.url}/users/${req.params.userId}`);
     
     // Option 2: Using the API client wrapper
     //const author = await UserApiClient.getUserProfile(req.params.userId);
@@ -34,15 +35,30 @@ exports.getAllPosts = async (req, res, next) => {
       .limitFields()
       .paginate();
     
-    const posts = await features.query.populate('author', 'username email');
+    //const posts = await features.query.populate('author', 'username email');
 
-    res.status(200).json({
-      status: 'success',
-      results: posts.length,
-      data: {
-        posts
-      }
-    });
+    //const posts = await Post.find();
+
+    // res.status(200).json({
+    //   status: 'success',
+    //   results: posts.length,
+    //   data: {
+    //     posts
+    //   }
+    // });
+
+    const posts = await features.query.lean(); // Convert to plain JS objects
+    const postsWithAuthors = await Promise.all(
+      posts.map(async (post) => {
+        console.log("url",req.headers.authorization,`${process.env.USER_SERVICE_URL}users/${post.author}`)
+        const userResponse = await axios.get(
+          `${process.env.USER_SERVICE_URL}users/${post.author}`,
+          { headers: { Authorization: req.headers.authorization } }
+        );
+        return { ...post, author: userResponse.data.data };
+      })
+    );
+    res.status(200).json({ status: 'success', data: postsWithAuthors });
   } catch (err) {
     next(err);
   }
@@ -76,7 +92,7 @@ exports.getPost = async (req, res, next) => {
 exports.createPost = async (req, res, next) => {
   try {
     // Add author from authenticated user
-    req.body.author = req.user.id;
+    req.body.author = req.user._id;
     
     const post = await Post.create(req.body);
 

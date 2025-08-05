@@ -16,6 +16,23 @@ services:
     networks:
       - blog-network
 
+  # Content Service
+  content-service:
+    build: ./content-service
+    container_name: content-service
+    ports:
+      - "3002:3002"  # Map host port 3002 to container port 3000
+    environment:
+      - NODE_ENV=development
+      - PORT=3002
+      - MONGO_URI=mongodb://user-db:27017/content_db_db
+      - JWT_SECRET=blogAppWithMicroserviceArchitecture
+    depends_on:
+      - user-db  # Wait for MongoDB to start
+
+    networks:
+      - blog-network
+
   # MongoDB for User Service
   user-db:
     image: mongo:6.0

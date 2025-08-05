@@ -1,7 +1,5 @@
 const mongoose = require('mongoose');
-const slug = require('mongoose-slug-generator');
-
-mongoose.plugin(slug);
+const slugify = require('slugify');
 
 const postSchema = new mongoose.Schema({
   title: {
@@ -66,6 +64,13 @@ postSchema.virtual('comments', {
   ref: 'Comment',
   foreignField: 'post',
   localField: '_id'
+});
+
+postSchema.pre('save', function(next) {
+  if (this.isModified('title')) {
+    this.slug = slugify(this.title, { lower: true, strict: true });
+  }
+  next();
 });
 
 // Indexes for better performance

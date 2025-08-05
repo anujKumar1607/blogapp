@@ -1,0 +1,23 @@
+{
+  "services": {
+    "user-service": {
+      "url": "http://user-service:3001",
+      "healthCheck": "/health"
+    },
+    "content-service": {
+      "url": "http://content-service:3002",
+      "healthCheck": "/health"
+    }
+  },
+  "jwt": {
+    "secret": "your_default_jwt_secret",
+    "expiresIn": "1h"
+  },
+  "mongodb": {
+    "url": "mongodb://mongodb:27017",
+    "options": {
+      "useNewUrlParser": true,
+      "useUnifiedTopology": true
+    }
+  }
+}

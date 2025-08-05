@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken');
-const User = require('../../../user-service/src/models/user.model');
+//const User = require('../../../user-service/src/models/user.model');
 const AppError = require('../utils/appError');
+const axios = require("axios")
 
 exports.protect = async (req, res, next) => {
   try {
@@ -22,15 +23,28 @@ exports.protect = async (req, res, next) => {
     // 2) Verification token
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     // 3) Check if user still exists
-    const currentUser = await User.findById(decoded.id);
-    if (!currentUser) {
-      return next(
-        new AppError('The user belonging to this token no longer exists', 401)
-      );
+    //console.log(`${process.env.USER_SERVICE_URL}auth/verify/${decoded.id}`)
+    const response = await axios.get(
+      `${process.env.USER_SERVICE_URL}auth/verify/${decoded.id}`,
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+
+    if (response.data.status !== 'success') {
+      return next(new AppError('User no longer exists', 401));
     }
 
+     req.user = response.data.data;
+
+    // const currentUser = await User.findById(decoded.id);
+    // console.log(decoded.id, process.env.JWT_SECRET)
+    // if (!currentUser) {
+    //   return next(
+    //     new AppError('The user belonging to this token no longer exists', 401)
+    //   );
+    // }
+
     // 4) Grant access to protected route
-    req.user = currentUser;
+    // req.user = currentUser;
     next();
   } catch (err) {
     next(err);

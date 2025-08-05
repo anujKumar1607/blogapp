@@ -1,0 +1,6 @@
+{
+  "logLevel": "warn",
+  "jwt": {
+    "secret": "${JWT_SECRET}"
+  }
+}
